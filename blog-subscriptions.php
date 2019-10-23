@@ -179,4 +179,86 @@ $options = get_option('blog-subscription');
 $post_type = 'publish_' . $options['subscription_post_type'];
 add_action( $post_type, 'inv_send_blog_notification', 10, 2 );
 
+// Add shortcode for form
+function display_blog_subscription_form($attr) {
+  $form_attr = shortcode_atts( array(
+   'id' => '0'
+ ), $attr );
+
+ $domains = array("3m.com","ablehealth.com","acupera.com","advancehlth.com","advantmed.com","adventadvisorygroup.com","advisory.com","aeaallc.com","aimspecialtyhealth.com","ainq.com","alegiscare.com","allscripts.com","altegrahealth.com","amerigroup.com","amerigroupcorp.com","anthem.com","anthemwc.com","anthemww.com","apixio.com","arcadiasolutions.com","argushealth.com","arrohealth.com","aspirehealthcare.com","assistrx.com","athenahealth.com","attacconsulting.com","availity.com","aviacode.com","bactes.com","basehealth.com","bcbsga.com","beammed.com","bestdoctors.com","billdunbar.com","bipc.com","bluehealthintelligence.com","bracketglobal.com","business.att.com","callcarenet.com","caradigm.com","careallies.com","carecentrix.com","caremetx.com","caremore.com","carenethealthcare.com","casenetllc.com","censeohealth.com","centaurihs.com","cernerhealth.com","changehealthcare.com","citiustech.com","citrahealth.com","clearviewhcp.com","clinigence.com","clrviewsolutions.com","cogitocorp.com","cognisight.com","comcast.net","coniferhealth.com","connecture.com","connectyourcare.com","consumerdirectonline.net","contextmatters.com","conveyhs.com","coordinatedcarehealth.com","corepointhealth.com","corp.cozeva.com","cotiviti.com","cozeva.com","cvinfosys.com","datalinksoftware.com","datstat.com","dchstx.org","ddds.com","decare.com","definitivehc.com","drane.me","drfirst.com","dsthealthsolutions.com","dstsystems.com","dynamichealthsys.com","e-imo.com","eclinicalworks.com","edgpartners.com","edifecs.com","ehealthinsurance.com","elizacorp.com","elsevier.com","empireblue.com","emsinet.com","enjoincdi.com","enli.net","enrollamerica.org","episource.com","evicore.com","evolenthealth.com","eyemed.com","forwardhealthgroup.com","fpdi.org","frgsystems.com","gafoods.com","gmail.com","gmsconnect.com","go.extensionhealthcare.com","gobalto.com","goldenwestdental.com","halfpenny.com","hallmarkbusinessconnections.com","hdms.com","healthagen.com","healthcareanalytics.expert","healthcareitleaders.com","healthcatalyst.com","healthcore.com","healthdatavision.com","healthendeavors.com","healthequity.com","healthfair.com","healthfidelity.com","healthlink.com","healthmonix.com","healthport.com","healthscape.com","healthscapeadvisors.com","healthx.com","hidesigns.com","himexperts.com","hmkbc.com","hms.com","homeaccess.com","hotmail.com","hp.com","hspweb.com","humanarc.com","i2ipophealth.com","ibm.com","ica-carealign.com","indegene.com","innovaccer.com","integraserviceconnect.com","interpreta.com","intersystems.com","ionhc.com","ivedix.com","jacobsononline.com","judge.com","kepro.com","lightbeamhealth.com","liquidhub.com","lumeris.com","lumiata.com","lumiradx.com","m2econ.com","madakethealth.com","Magellandx.com","marwoodgroup.com","matrixhealth.net","maxhealth.com","mckesson.com","mdv.com","MDXNET.COM","medeanalytics.com","medecision.com","medhok.com","medicalis.com","medivo.com","mediware.com","medxm1.com","meridianresource.com","milliman.com","mitre.org","mmm.com","motivemi.com","mrocorp.com","nagnoi.com","nammcal.com","navigant.com","neodeckholdings.com","neurometrix.com","ngsservices.com","novu.com","nuance.com","opayq.com","optimityadvisors.com","optum.com","optumrx.com","oracle.com","os2healthcaresolutions.com","peakras.com","pharmmd.com","pilotfish.eu","pointright.com","pophealthcare.com","ppmsi.com","practicefusion.com","predilytics.com","premierinc.com","prometrics.com","public.zirmed.com","pulse8.com","pyapc.com","q-centrix.com","quantiphi.com","questanalytics.com","relayhealth.com","resolutionhealth.com","risehealth.org","riskadjustmentconsulting.com","rsamedical.com","rxante.com","rxbenefits.com","rxreviewllc.com","saludrevenue.com","sas.com","scanhealthplan.com","sdlcpartners.com","selectdata.com","semlerscientific.com","shyftanalytics.com","signaturemedicalgroup.com","silverback-cm.com","simplyhealthcareplans.com","sphanalytics.com","ssigroup.com","strenuus.com","synapticap.com","talix.com","telemedik.com","telligen.com","themisanalytics.com","thinkbrg.com","tmghealth.com","tridentcap.com","triple-tree.com","trizetto.com","truvenhealth.com","ultimatemedical.edu","unicare.com","us-rxcare.com","usmd.com","usmmllc.com","valuecentric.com","vaticahealth.com","vecna.com","verisk.com","veriskhealth.com","verisys.com","verizon.net","verscend.com","visionaryrcm.com","VSP.com","vynecorp.com","wellcentive.com","wellpoint.com","whiteglove.com","wilmingtonplc.com","xby2.com","yahoo.com","zapprx.com","zeomega.com","zephyrhealth.com","zoomrx.com");
+
+  $form_url = 'https://secure.p04.eloqua.com/api/REST/2.0/assets/form/'
+  . $form_attr['id'];
+  $ch = curl_init($form_url);
+
+  $options = get_option('blog-subscription');
+
+  $username = $options['eloqua_username'];
+  $password = $options['eloqua_password'];
+
+  $headers = array(
+    'Content-Type: application/json',
+    'Authorization: Basic '. base64_encode("$username:$password")
+  );
+
+  curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+  curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+  $response = curl_exec($ch);
+  $response = json_decode($response, true);
+  //curl_close($ch);
+
+  $dom = new DOMDocument();
+  $dom->loadHTML($response['html']);
+  $scripts = $dom->getElementsByTagName('script');
+  $validation_script = $dom->saveHTML($scripts[1]);
+  $scripts[1]->parentNode->removeChild($scripts[1]);
+
+  preg_match('/(\bfunction handleFormSubmit\b)[\s\S]*?\}/', $validation_script, $removed_script);
+
+
+  $posSubmit = strpos($removed_script[0], '{');
+  $posRemainder = strpos($validation_script, '}');
+
+  $extra_script = '<script>
+    var validAddress = true;
+
+    $( document ).ready(function() {
+
+      $("input.elq-item-input").each(function (index, value){
+        $(this).attr("value", "");
+      });
+
+      $("input[name=\'emailAddress\']").blur(function() {
+        domains = ' . json_encode($domains) . ';
+        email = $(this).val();
+        atIndex = email.indexOf("@");
+
+        if(atIndex > -1) {
+          emailDomain = email.split("@");
+          if(domains.indexOf(emailDomain[1])>-1) {
+            validAddress = false;
+          };
+        };
+      });
+    });
+
+    function handleFormSubmit(ele) {
+      if(validAddress) {
+
+      ' . substr($removed_script[0], $posSubmit + 1) . '
+      else {
+        window.location.href = "https://webdev.inovalon.com/form-test-invalid/";
+        return false;
+      }
+    }' . substr($validation_script, $posRemainder + 1) . '
+
+
+    </script>';
+
+  return $dom->saveHTML() . $extra_script;
+};
+
+add_shortcode('blog-subscription-form', 'display_blog_subscription_form');
 ?>
