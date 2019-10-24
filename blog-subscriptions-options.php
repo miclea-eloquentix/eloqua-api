@@ -99,22 +99,6 @@ class BlogSubscriptionOptions {
       );
 
       add_settings_field(
-        'eloqua_email_header_id',
-        'Eloqua Email Header ID',
-        array($this, 'eloqua_email_header_id_callback'),
-        'blog-subscription-setting-admin',
-        'eloqua-campaign'
-      );
-
-      add_settings_field(
-        'eloqua_email_footer_id',
-        'Eloqua Email Footer ID',
-        array($this, 'eloqua_email_footer_id_callback'),
-        'blog-subscription-setting-admin',
-        'eloqua-campaign'
-      );
-
-      add_settings_field(
         'eloqua_campaign_name',
         'Eloqua Campaign Name',
         array($this, 'eloqua_campaign_name_callback'),
@@ -191,6 +175,29 @@ class BlogSubscriptionOptions {
         'blog-subscription-setting-admin',
         'subscription_post_type_section'
       );
+
+      add_settings_section(
+        'invalid_domains_section',
+        'Invalid Email Domains',
+        array($this, 'print_invalid_domains_info'),
+        'blog-subscription-setting-admin'
+      );
+
+      add_settings_field(
+        'invalid_domains',
+        'Invalid Domains',
+        array($this, 'invalid_domains_callback'),
+        'blog-subscription-setting-admin',
+        'invalid_domains_section'
+      );
+
+      add_settings_field(
+        'invalid_domains_redirect',
+        'Page to which Invalid Domains Should Be Redirected',
+        array($this, 'invalid_domains_redirect_callback'),
+        'blog-subscription-setting-admin',
+        'invalid_domains_section'
+      );
     }
 
     /**
@@ -216,14 +223,6 @@ class BlogSubscriptionOptions {
 
         if (isset($input['eloqua_email_group_id'])) {
             $new_input['eloqua_email_group_id'] = intval($input['eloqua_email_group_id']);
-        }
-
-        if (isset($input['eloqua_email_header_id'])) {
-            $new_input['eloqua_email_header_id'] = intval($input['eloqua_email_header_id']);
-        }
-
-        if (isset($input['eloqua_email_footer_id'])) {
-            $new_input['eloqua_email_footer_id'] = intval($input['eloqua_email_footer_id']);
         }
 
         if (isset($input['eloqua_campaign_name'])) {
@@ -258,6 +257,14 @@ class BlogSubscriptionOptions {
             $new_input['subscription_post_type'] = sanitize_text_field($input['subscription_post_type']);
         }
 
+        if (isset($input['invalid_domains'])) {
+            $new_input['invalid_domains'] = sanitize_text_field($input['invalid_domains']);
+        }
+
+        if (isset($input['invalid_domains_redirect'])) {
+            $new_input['invalid_domains_redirect'] = sanitize_text_field($input['invalid_domains_redirect']);
+        }
+
         return $new_input;
     }
 
@@ -276,6 +283,10 @@ class BlogSubscriptionOptions {
 
     public function print_subscription_post_type_info() {
         print 'Select the post type for which notifications will be sent.';
+    }
+
+    public function print_invalid_domains_info() {
+        print 'Enter a comma separated list of invalid email domains that should not be submitted to Eloqua. The commas separating the domains should not have a space on either side. Do not put quotation marks around the domains. Also enter the URL to which invalid submissions will be sent. Enter the full URL, including https://.';
     }
 
     // Callbacks to format the form
@@ -304,20 +315,6 @@ class BlogSubscriptionOptions {
         printf(
           '<input type="text" id="eloqua_email_group_id" name="blog-subscription[eloqua_email_group_id]" value="%s"/>',
           isset($this->options['eloqua_email_group_id']) ? esc_attr($this->options['eloqua_email_group_id']) : ''
-        );
-    }
-
-    public function eloqua_email_header_id_callback() {
-        printf(
-          '<input type="text" id="eloqua_email_header_id" name="blog-subscription[eloqua_email_header_id]" value="%s"/>',
-          isset($this->options['eloqua_email_header_id']) ? esc_attr($this->options['eloqua_email_header_id']) : ''
-        );
-    }
-
-    public function eloqua_email_footer_id_callback() {
-        printf(
-          '<input type="text" id="eloqua_email_footer_id" name="blog-subscription[eloqua_email_footer_id]" value="%s"/>',
-          isset($this->options['eloqua_email_footer_id']) ? esc_attr($this->options['eloqua_email_footer_id']) : ''
         );
     }
 
@@ -386,4 +383,25 @@ class BlogSubscriptionOptions {
           '<select name="blog-subscription[subscription_post_type]">' . $selector_options .'</select>'
         );
     }
+
+    public function invalid_domains_callback() {
+        if(isset($this->options['invalid_domains'])) {
+          $invalidDomainsValue = esc_attr($this->options['invalid_domains']);
+        } else {
+          $invalidDomainsValue = "";
+        };
+
+        printf(
+          '<textarea rows="20" cols="100" id="invalid_domains" name="blog-subscription[invalid_domains]" value="%s">' . $invalidDomainsValue . '</textarea>',
+          isset($this->options['invalid_domains']) ? esc_attr($this->options['invalid_domains']) : ''
+        );
+    }
+
+    public function invalid_domains_redirect_callback() {
+        printf(
+          '<input type="text" id="invalid_domains_redirect" name="blog-subscription[invalid_domains_redirect]" value="%s" size="50"/>',
+          isset($this->options['invalid_domains_redirect']) ? esc_attr($this->options['invalid_domains_redirect']) : ''
+        );
+    }
+
 }
