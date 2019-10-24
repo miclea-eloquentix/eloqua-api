@@ -30,3 +30,6 @@ The dropdown will display the various post types your site uses. Select the one 
 
 ### Invalid Email Domains
 If you wish to exclude any domains from subscribing, enter a comma-separated list of the domains. Examples of domains you might wish to exclude include disposable email account (e.g., gmail.com) and competitors. Also enter the full URL of the page to which invalid submissions should be sent.
+
+## Accept Subscriptions
+To include a form to allow people to subscribe, use the shortcode `[blog-subscription-form id='###']` where ### is the ID of the appropriate form in Eloqua.
