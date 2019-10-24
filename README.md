@@ -8,7 +8,13 @@ Upload the blog-subscriptions.zip file and activate the plugin.
 
 ## Setup in Eloqua
 
+An Eloqua administrator will need to create three assets in Eloqua.
 
+The first is the email segment that will be used to store the email addresses of people who subscribe. The ID and name of this segment will need to be entered in the plugin setting screen in WordPress.
+
+The second is the form that will feed registrants to the segment. This form will be retrieved by the plugin and added to the appropriate WordPress pages. The ID of this form is used in the shortcode that is used to place the form on a page.
+
+The final asset is an email to serve as a template. The plugin will retrieve this email and use it to create each subscription notification email. The email should contain the code `<a href="[[[link]]]">[[[title]]]</a>` as a placeholder for the URL and title of the new blog post. These will automatically be replaced with the correct values by the plugin when it creates a new email. The email ID and email group ID for the template will need to be entered into the plugin settings page.
 
 ## Setup in WordPress
 
