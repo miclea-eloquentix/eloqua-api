@@ -23,7 +23,7 @@ Under the Settings menu on the left side of the WordPress backend, click on Blog
 Enter the relevant settings:
 
 ### Eloqua Authentication
-Username and password for Eloqua are required. All actions taken by the plugin on Eloqua will appear as an action of this user. You will need to ensure that the account used has sufficient permissions to make API calls to Eloqua.
+A username and password for Eloqua are required. All actions taken by the plugin on Eloqua will appear as an action of this user. You will need to ensure that the account used has sufficient permissions to make API calls to Eloqua.
 
 ### Eloqua Campaign Information
 This information is used to retrieve the email template, save the new email for each insight, and trigger the campaign. The Email ID and Email Group ID should correspond to the relevant fields in the proper email template in Eloqua. The Eloqua Campaign Name and Eloqua Email Name are the base names of the campaign and email associated with each insight. The name of each asset will appear in Eloqua with the base name you supply plus a generated date and time stamp. For example, if you name the email New Inovalon Insight Notification, the email in Eloqua may be saved as New Inovalon Insight Notification 1571922076 2019-10-24. The Eloqua Email Subject Line will appear in the subject line of each outgoing email. The Eloqua Segment ID and Eloqua Segment Name indicate the list of email addresses to which notifications will be sent. Your Eloqua administrator should create this segment for you and give you the ID and name.

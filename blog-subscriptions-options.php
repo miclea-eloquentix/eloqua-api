@@ -114,14 +114,6 @@ class BlogSubscriptionOptions {
         'eloqua-campaign'
       );
 
-      add_settings_field(
-        'eloqua_email_subject',
-        'Eloqua Email Subject Line',
-        array($this, 'eloqua_email_subject_callback'),
-        'blog-subscription-setting-admin',
-        'eloqua-campaign'
-      );
-
       add_settings_section(
         'eloqua-urls',
         'Eloqua Endpoints',
@@ -233,10 +225,6 @@ class BlogSubscriptionOptions {
             $new_input['eloqua_email_name'] = sanitize_text_field($input['eloqua_email_name']);
         }
 
-        if (isset($input['eloqua_email_subject'])) {
-            $new_input['eloqua_email_subject'] = sanitize_text_field($input['eloqua_email_subject']);
-        }
-
         if (isset($input['eloqua_retrieve_email_url'])) {
             $new_input['eloqua_retrieve_email_url'] = sanitize_text_field($input['eloqua_retrieve_email_url']);
         }
@@ -329,13 +317,6 @@ class BlogSubscriptionOptions {
         printf(
           '<input type="text" id="eloqua_email_name" name="blog-subscription[eloqua_email_name]" value="%s"/>',
           isset($this->options['eloqua_email_name']) ? esc_attr($this->options['eloqua_email_name']) : ''
-        );
-    }
-
-    public function eloqua_email_subject_callback() {
-        printf(
-          '<input type="text" id="eloqua_email_subject" name="blog-subscription[eloqua_email_subject]" value="%s"/>',
-          isset($this->options['eloqua_email_subject']) ? esc_attr($this->options['eloqua_email_subject']) : ''
         );
     }
 

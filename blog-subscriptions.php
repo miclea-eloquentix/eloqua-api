@@ -30,7 +30,7 @@ function inv_send_blog_notification($id, $post) {
     $create_campaign_url = $options['eloqua_create_campaign_url'];
     $email_name = $options['eloqua_email_name'];
     $email_group_id = $options['eloqua_email_group_id'];
-    $email_subject = $options['eloqua_email_subject'];
+    $email_subject = get_post_meta( $id, 'blog_email_subject_line' );
 
     $headers = array(
       'Content-Type: application/json',
