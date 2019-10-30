@@ -26,7 +26,7 @@ Enter the relevant settings:
 A username and password for Eloqua are required. All actions taken by the plugin on Eloqua will appear as an action of this user. You will need to ensure that the account used has sufficient permissions to make API calls to Eloqua.
 
 ### Eloqua Campaign Information
-This information is used to retrieve the email template, save the new email for each insight, and trigger the campaign. The Email ID and Email Group ID should correspond to the relevant fields in the proper email template in Eloqua. The Eloqua Campaign Name and Eloqua Email Name are the base names of the campaign and email associated with each insight. The name of each asset will appear in Eloqua with the base name you supply plus a generated date and time stamp. For example, if you name the email New Inovalon Insight Notification, the email in Eloqua may be saved as New Inovalon Insight Notification 1571922076 2019-10-24. The Eloqua Email Subject Line will appear in the subject line of each outgoing email. The Eloqua Segment ID and Eloqua Segment Name indicate the list of email addresses to which notifications will be sent. Your Eloqua administrator should create this segment for you and give you the ID and name.
+This information is used to retrieve the email template, save the new email for each insight, and trigger the campaign. The Email ID and Email Group ID should correspond to the relevant fields in the proper email template in Eloqua. The Eloqua Campaign Name and Eloqua Email Name are the base names of the campaign and email associated with each insight. The name of each asset will appear in Eloqua with the base name you supply plus a generated date and time stamp. For example, if you name the email New Inovalon Insight Notification, the email in Eloqua may be saved as New Inovalon Insight Notification 1571922076 2019-10-24. The Default Email Subject Line will be used as the subject line of the email when no email subject line is specified in the blog post. The Eloqua Segment ID and Eloqua Segment Name indicate the list of email addresses to which notifications will be sent. Your Eloqua administrator should create this segment for you and give you the ID and name.
 
 ### Eloqua Endpoints
 These are the endpoints used to make the API calls. The URLs comprise two parts. The first is the base URL assigned to you by Eloqua. This will be the same for every endpoint. Your Eloqua administrator should be able to locate this. The second part of the URL is the endpoint target for the given action. These can be located at https://docs.oracle.com/cloud/latest/marketingcs_gs/OMCAC/rest-endpoints.html. Use the endpoints under Tasks > Application > 2.0. Please ensure that you put https:// at the beginning of the URL. Do not put a / at the end.
@@ -39,3 +39,9 @@ If you wish to exclude any domains from subscribing, enter a comma-separated lis
 
 ## Accept Subscriptions
 To include a form to allow people to subscribe, use the shortcode `[blog-subscription-form id='###']` where ### is the ID of the appropriate form in Eloqua.
+
+## Create a Post
+
+When you create a post, two custom fields will be available. One will be the Email Subject Line. If no email subject line is entered, the default subject line from the settings page (see above) will be used.
+
+The other is a checkbox that determines whether a notification email will be sent. If the box is checked, the email will be sent. If not, then no email will be sent. If you have published a post without sending a notification, you can send a notification by checking the box and republishing the post. Only one notification can be sent per post. If you have already sent a notification, the status of the checkbox is irrelevant. No further emails will be sent.

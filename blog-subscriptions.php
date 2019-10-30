@@ -14,6 +14,10 @@ $settings = new BlogSubscriptionOptions();
 // Main function
 function inv_send_blog_notification($id, $post) {
 
+    if ( !isset( $_POST['send_subscription_email'] ) ) {
+      return;
+    }
+
     if ( get_post_meta( $id, 'eloqua_email_sent' ) ) {
       return;
     };
@@ -275,7 +279,7 @@ function eloqua_subscription_meta_box() {
     if ( isset( $options['subscription_post_type'] ) ) {
       add_meta_box( 'eloqua_email_subject_line', __( 'Subscription Email Subject Line', 'textdomain' ), 'eloqua_subscription_meta_box_callback', $options['subscription_post_type'] );
 
-      add_meta_box( 'send_subscription_email', __( 'Send Subscription Email?', 'textdomain' ), 'send_subscription_email_callback', $options['subscription_post_type'] );
+      add_meta_box( 'send_subscription_email', __( 'Send Subscription Email?', 'textdomain' ), 'send_subscription_email_callback', $options['subscription_post_type'], 'side' );
     }
   }
 
@@ -291,7 +295,7 @@ function send_subscription_email_callback($post, $metabox) {
       $checked = "";
     }
 
-    echo '<input type="checkbox" id="send_subscription_email" name="send_subscription_email" value="yes" ' . $checked . '>';
+    echo '<input type="checkbox" id="send_subscription_email" name="send_subscription_email" value="yes" ' . $checked . '><label for="send_subscription_email">Select to send subscription notification</label>';
 }
 
 add_action( 'add_meta_boxes', 'eloqua_subscription_meta_box' );
