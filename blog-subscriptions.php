@@ -1,12 +1,21 @@
 <?php
-/**
- * Plugin Name: Blog Subscriptions with Eloqua
- * Plugin URI:
- * Description: Use Eloqua to send a notification to subscribers whenever a new blog post is published
- * Version: 1.0
- * Author: Kevin A. Wilson
- * Author URI: http://www.bluecord.org/#kevinawilson
- */
+/*
+Plugin Name: Blog Subscriptions with Eloqua
+Description: Use Eloqua to send a notification to subscribers whenever a new blog post is published
+Version: 1.0
+Author: Kevin A. Wilson
+Author URI: http://www.bluecord.org/#kevinawilson
+License: GPL v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+
+Blog Subscriptions with Eloqua is free software: you can redistribute it or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or any later version.
+
+Blog Subscriptions with Eloqua is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with Blog Subscriptions with Eloqua. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
+*/
 
 require('blog-subscriptions-options.php');
 $settings = new BlogSubscriptionOptions();
@@ -234,15 +243,15 @@ function display_blog_subscription_form($attr) {
   $extra_script = '<script>
     var validAddress = true;
 
-    $( document ).ready(function() {
+    jQuery( document ).ready(function() {
 
-      $("input.elq-item-input").each(function (index, value){
-        $(this).attr("value", "");
+      jQuery("input.elq-item-input").each(function (index, value){
+        jQuery(this).attr("value", "");
       });
 
-      $("input[name=\'emailAddress\']").blur(function() {
+      jQuery("input[name=\'emailAddress\']").blur(function() {
         domains = ' . json_encode($domains) . ';
-        email = $(this).val();
+        email = jQuery(this).val();
         atIndex = email.indexOf("@");
 
         if(atIndex > -1) {
