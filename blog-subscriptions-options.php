@@ -122,6 +122,30 @@ class BlogSubscriptionOptions {
         'eloqua-campaign'
       );
 
+      add_settings_field(
+        'eloqua_form_id',
+        'Eloqua Subscription Form ID',
+        array($this, 'eloqua_form_id_callback'),
+        'blog-subscription-setting-admin',
+        'eloqua-campaign'
+      );
+
+      add_settings_field(
+        'eloqua_segment_name',
+        'Eloqua Segment Name',
+        array($this, 'eloqua_segment_name_callback'),
+        'blog-subscription-setting-admin',
+        'eloqua-campaign'
+      );
+
+      add_settings_field(
+        'eloqua_segment_id',
+        'Eloqua Email Segment ID',
+        array($this, 'eloqua_segment_id_callback'),
+        'blog-subscription-setting-admin',
+        'eloqua-campaign'
+      );
+
       add_settings_section(
         'eloqua-urls',
         'Eloqua Endpoints',
@@ -237,6 +261,18 @@ class BlogSubscriptionOptions {
             $new_input['eloqua_email_subject_line'] = sanitize_text_field($input['eloqua_email_subject_line']);
         }
 
+        if (isset($input['eloqua_form_id'])) {
+            $new_input['eloqua_form_id'] = sanitize_text_field($input['eloqua_form_id']);
+        }
+
+        if (isset($input['eloqua_segment_name'])) {
+            $new_input['eloqua_segment_name'] = sanitize_text_field($input['eloqua_segment_name']);
+        }
+
+        if (isset($input['eloqua_segment_id'])) {
+            $new_input['eloqua_segment_id'] = sanitize_text_field($input['eloqua_segment_id']);
+        }
+
         if (isset($input['eloqua_retrieve_email_url'])) {
             $new_input['eloqua_retrieve_email_url'] = sanitize_text_field($input['eloqua_retrieve_email_url']);
         }
@@ -336,6 +372,27 @@ class BlogSubscriptionOptions {
         printf(
           '<input type="text" id="eloqua_email_subject_line" name="blog-subscription[eloqua_email_subject_line]" value="%s"/>',
           isset($this->options['eloqua_email_subject_line']) ? esc_attr($this->options['eloqua_email_subject_line']) : ''
+        );
+    }
+
+    public function eloqua_form_id_callback() {
+        printf(
+          '<input type="text" id="eloqua_form_id" name="blog-subscription[eloqua_form_id]" value="%s"/>',
+          isset($this->options['eloqua_form_id']) ? esc_attr($this->options['eloqua_form_id']) : ''
+        );
+    }
+
+    public function eloqua_segment_name_callback() {
+        printf(
+          '<input type="text" id="eloqua_segment_name" name="blog-subscription[eloqua_segment_name]" value="%s"/>',
+          isset($this->options['eloqua_segment_name']) ? esc_attr($this->options['eloqua_segment_name']) : ''
+        );
+    }
+
+    public function eloqua_segment_id_callback() {
+        printf(
+          '<input type="text" id="eloqua_segment_id" name="blog-subscription[eloqua_segment_id]" value="%s"/>',
+          isset($this->options['eloqua_segment_id']) ? esc_attr($this->options['eloqua_segment_id']) : ''
         );
     }
 

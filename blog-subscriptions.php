@@ -9,10 +9,9 @@ License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 
-Blog Subscriptions with Eloqua is free software: you can redistribute it or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or any later version.
+Blog Subscriptions with Eloqua is free software: you can redistribute it or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License or any later version.
 
-Blog Subscriptions with Eloqua is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+Blog Subscriptions with Eloqua is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with Blog Subscriptions with Eloqua. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
 */
@@ -44,6 +43,8 @@ function inv_send_blog_notification($id, $post) {
     $create_campaign_url = $options['eloqua_create_campaign_url'];
     $email_name = $options['eloqua_email_name'];
     $email_group_id = $options['eloqua_email_group_id'];
+    $segment_id = $options['eloqua_segment_id'];
+    $segment_name = $options['eloqua_segment_name'];
 
     if ( $_POST['eloqua_email_subject_line'] != '' ) {
       $email_subject = $_POST['eloqua_email_subject_line'];
@@ -58,7 +59,7 @@ function inv_send_blog_notification($id, $post) {
 
     $email_id = inv_create_email($headers, $retrieve_email_url, $create_email_url, $link, $title, $email_name, $email_group_id, $email_subject);
 
-    $campaign = inv_create_eloqua_campaign($headers, $create_campaign_url, $email_id);
+    $campaign = inv_create_eloqua_campaign($headers, $create_campaign_url, $email_id, $segment_id, $segment_name);
 
     $activate_url = $options['eloqua_activate_campaign_url'] . '/' . $campaign;
     inv_activate_eloqua_campaign($headers, $activate_url);
@@ -124,7 +125,7 @@ function inv_create_email($headers, $retrieve_email_url, $create_email_url, $lin
 };
 
 // Create an Eloqua campaign with the new email and relevant segment
-function inv_create_eloqua_campaign($headers, $url, $email_id) {
+function inv_create_eloqua_campaign($headers, $url, $email_id, $segment_id, $segment_name) {
     $ch = curl_init($url);
 
     $t = time();
@@ -138,8 +139,8 @@ function inv_create_eloqua_campaign($headers, $url, $email_id) {
       "elements": [{
         "type": "CampaignSegment",
         "id": "-1",
-        "name": "Insights Blog Form (8.29.19)",
-        "segmentId": "2049",
+        "name": "'. $segment_name . '",
+        "segmentId": "'. $segment_id . '",
         "position": {
           "type": "Position",
           "x": "100",
