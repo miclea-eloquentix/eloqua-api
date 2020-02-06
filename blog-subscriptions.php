@@ -16,11 +16,14 @@ Blog Subscriptions with Eloqua is distributed in the hope that it will be useful
 You should have received a copy of the GNU General Public License along with Blog Subscriptions with Eloqua. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
 */
 
-require('blog-subscriptions-options.php');
+require_once('BlogSubscriptionsOptions.php');
+require_once('EloquaConnector.php');
+
 $settings = new BlogSubscriptionOptions();
+$connector = new EloquaConnector();
 
 // Main function
-function inv_send_blog_notification($id, $post) {
+function blog_notification($id, $post) {
 
     if ( !isset( $_POST['send_subscription_email'] ) ) {
       return;
@@ -30,204 +33,28 @@ function inv_send_blog_notification($id, $post) {
       return;
     };
 
-    $options = get_option('blog-subscription');
-
     $title = $post->post_title;
     $link = get_permalink($post);
 
-    // Retrieve options
-    $username = $options['eloqua_username'];
-    $password = $options['eloqua_password'];
-    $retrieve_email_url = $options['eloqua_retrieve_email_url'] . '/' . $options['eloqua_email_id'];
-    $create_email_url = $options['eloqua_create_email_url'];
-    $create_campaign_url = $options['eloqua_create_campaign_url'];
-    $email_name = $options['eloqua_email_name'];
-    $email_group_id = $options['eloqua_email_group_id'];
-    $segment_id = $options['eloqua_segment_id'];
-    $segment_name = $options['eloqua_segment_name'];
+    $email_id = $connector->create_email($link, $title);
 
-    if ( $_POST['eloqua_email_subject_line'] != '' ) {
-      $email_subject = $_POST['eloqua_email_subject_line'];
-    } else {
-      $email_subject = $options['eloqua_email_subject_line'];
-    }
+    $campaign = $connector->create_eloqua_campaign($email_id);
 
-    $headers = array(
-      'Content-Type: application/json',
-      'Authorization: Basic '. base64_encode("$username:$password")
-    );
-
-    $email_id = inv_create_email($headers, $retrieve_email_url, $create_email_url, $link, $title, $email_name, $email_group_id, $email_subject);
-
-    $campaign = inv_create_eloqua_campaign($headers, $create_campaign_url, $email_id, $segment_id, $segment_name);
-
-    $activate_url = $options['eloqua_activate_campaign_url'] . '/' . $campaign;
-    inv_activate_eloqua_campaign($headers, $activate_url);
+    activate_eloqua_campaign($campaign);
 
     add_post_meta($id, 'eloqua_email_sent', true, true);
-};
-
-// Retrieve email template, make changes, and create new email from template
-function inv_create_email($headers, $retrieve_email_url, $create_email_url, $link, $title, $email_name, $email_group_id, $email_subject) {
-    // Retrieve email template
-
-    $ch = curl_init($retrieve_email_url);
-
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-    $response = curl_exec($ch);
-    $response = json_decode($response, true);
-    $htmlContent = $response['htmlContent']['html'];
-    $email_header_id = $response['emailHeaderId'];
-    $email_footer_id = $response['emailFooterId'];
-
-    // Add replace link and title in email
-    $htmlContent = str_replace('[[[title]]]', $title, $htmlContent);
-    $htmlContent = str_replace('[[[link]]]', $link, $htmlContent);
-
-    curl_close($ch);
-
-    // Create new email
-    $ch = curl_init($create_email_url);
-
-    $t = time();
-    $d = date("Y-m-d",$t);
-    $stamp = ' ' . $t . ' ' . $d;
-
-    $email_name = $email_name . ' ' . $stamp;
-
-    $new_email = array(
-      "name" => $email_name,
-      "emailGroupId" => $email_group_id,
-      "emailHeaderId" => $email_header_id,
-      "emailFooterId" => $email_footer_id,
-      "subject" => $email_subject,
-      "htmlContent" => array(
-          "type" => "RawHtmlContent",
-          "html" => $htmlContent
-      )
-    );
-
-    $email_data = json_encode($new_email);
-
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $email_data);
-
-    $response = curl_exec($ch);
-    curl_close($ch);
-
-    $response = json_decode($response, true);
-    return $response['id'];
-};
-
-// Create an Eloqua campaign with the new email and relevant segment
-function inv_create_eloqua_campaign($headers, $url, $email_id, $segment_id, $segment_name) {
-    $ch = curl_init($url);
-
-    $t = time();
-    $d = date("Y-m-d",$t);
-    $stamp = ' ' . $t . ' ' . $d;
-    $endAt = $t + (7 * 24 * 60 * 60);
-
-    $json_body = '{
-      "name": "Inovalon Blog Subscription Campaign ' . $stamp . '",
-      "endAt": ' . $endAt . ',
-      "elements": [{
-        "type": "CampaignSegment",
-        "id": "-1",
-        "name": "'. $segment_name . '",
-        "segmentId": "'. $segment_id . '",
-        "position": {
-          "type": "Position",
-          "x": "100",
-          "y": "100"
-        },
-        "outputTerminals": [{
-          "type": "CampaignOutputTerminal",
-          "connectedId": "-2",
-          "connectedType": "CampaignEmail",
-          "terminalType": "out"
-          }]
-        },
-        {
-          "type": "CampaignEmail",
-          "emailId": "' . $email_id .'",
-          "id": "-2",
-          "position": {
-            "type": "Position",
-            "x": "100",
-            "y": "200"
-          }
-        }
-      ]
-    }';
-
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $json_body);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-    $response = curl_exec($ch);
-    $response = json_decode($response, true);
-
-    return $response['id'];
-};
-
-// Activate the new campaign
-function inv_activate_eloqua_campaign($headers, $url) {
-    $ch = curl_init($url);
-
-    $params = '{
-      "activateNow": true,
-      "scheduledFor": "now"
-    }';
-
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-    $response = curl_exec($ch);
-    curl_close($ch);
 };
 
 $options = get_option('blog-subscription');
 $post_type = 'publish_' . $options['subscription_post_type'];
 
-add_action( $post_type, 'inv_send_blog_notification', 99, 2 );
+add_action( $post_type, 'blog_notification', 99, 2 );
 
 // Add shortcode for form
 function display_blog_subscription_form($attr) {
-  $form_attr = shortcode_atts( array(
-   'id' => '0'
-  ), $attr );
-
-  $form_url = 'https://secure.p04.eloqua.com/api/REST/2.0/assets/form/' . $form_attr['id'];
-  $ch = curl_init($form_url);
+  $response = $connector->retrieve_blog_subscription_form($attr);
 
   $options = get_option('blog-subscription');
-
-  $domains = explode(',', $options['invalid_domains']);
-
-  $username = $options['eloqua_username'];
-  $password = $options['eloqua_password'];
-
-  $headers = array(
-    'Content-Type: application/json',
-    'Authorization: Basic '. base64_encode("$username:$password")
-  );
-
-  curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-  curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-  $response = curl_exec($ch);
-  $response = json_decode($response, true);
-  //curl_close($ch);
 
   $dom = new DOMDocument();
   $dom->loadHTML($response['html']);
@@ -237,7 +64,9 @@ function display_blog_subscription_form($attr) {
 
   preg_match('/(\bfunction handleFormSubmit\b)[\s\S]*?\}/', $validation_script, $removed_script);
 
+  $domains = explode(',', $options['invalid_domains']);
   $invalidDomainsRedirect = $options['invalid_domains_redirect'];
+
   $posSubmit = strpos($removed_script[0], '{');
   $posRemainder = strpos($validation_script, '}');
 
