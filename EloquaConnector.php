@@ -178,19 +178,7 @@ public function retrieve_blog_subscription_form($attr) {
   $form_url = 'https://secure.p04.eloqua.com/api/REST/2.0/assets/form/' . $form_attr['id'];
   $ch = curl_init($form_url);
 
-  $options = get_option('blog-subscription');
-
-  $domains = explode(',', $options['invalid_domains']);
-
-  $username = $options['eloqua_username'];
-  $password = $options['eloqua_password'];
-
-  $headers = array(
-    'Content-Type: application/json',
-    'Authorization: Basic '. base64_encode("$username:$password")
-  );
-
-  curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, $this->headers);
   curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
