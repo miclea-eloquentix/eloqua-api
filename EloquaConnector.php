@@ -100,7 +100,7 @@ public function create_email($link, $title) {
 }
 
 // Create an Eloqua campaign with the new email and relevant segment
-public function create_eloqua_campaign($email_id) {
+public function create_campaign($email_id) {
     $ch = curl_init($this->create_campaign_url);
 
     $t = time();
@@ -153,8 +153,8 @@ public function create_eloqua_campaign($email_id) {
 }
 
 // Activate the new campaign
-public function activate_eloqua_campaign($campaign_id) {
-    $activate_url_campaign = $this->activate_url . '/' . $campaign;
+public function activate_campaign($campaign_id) {
+    $activate_url_campaign = $this->activate_url . '/' . $campaign_id;
     $ch = curl_init($activate_url_campaign);
 
     $params = '{
@@ -171,8 +171,8 @@ public function activate_eloqua_campaign($campaign_id) {
     curl_close($ch);
 }
 
-// Add shortcode for form
-public function retrieve_blog_subscription_form($attr) {
+// Retrieve a form from Eloqua
+public function retrieve_form($attr) {
   $form_attr = shortcode_atts( array( 'id' => '0' ), $attr );
 
   $form_url = 'https://secure.p04.eloqua.com/api/REST/2.0/assets/form/' . $form_attr['id'];
@@ -186,59 +186,6 @@ public function retrieve_blog_subscription_form($attr) {
   $response = json_decode($response, true);
 
   return $response;
-}
-
-// Add meta box for email subject line to selected post type
-public function eloqua_subscription_meta_box() {
-    $options = get_option('blog-subscription');
-
-    if ( isset( $options['subscription_post_type'] ) ) {
-      add_meta_box( 'eloqua_email_subject_line', __( 'Subscription Email Subject Line', 'textdomain' ), 'eloqua_subscription_meta_box_callback', $options['subscription_post_type'] );
-
-      add_meta_box( 'send_subscription_email', __( 'Send Subscription Email?', 'textdomain' ), 'send_subscription_email_callback', $options['subscription_post_type'], 'side' );
-    }
-  }
-
-public function eloqua_subscription_meta_box_callback($post, $metabox) {
-    wp_nonce_field( 'eloqua_email_subject_line_nonce', 'eloqua_email_subject_line_nonce' );
-    echo '<input type="text" style="width:100%" id="eloqua_email_subject_line" name="eloqua_email_subject_line" value="' . esc_attr( get_post_meta( $post->ID, 'eloqua_email_subject_line', true ) ) . '">';
-}
-
-public function send_subscription_email_callback($post, $metabox) {
-    if ( get_post_meta( $post->ID, 'send_subscription_email', true ) ) {
-      $checked = "checked";
-    } else {
-      $checked = "";
-    }
-
-    echo '<input type="checkbox" id="send_subscription_email" name="send_subscription_email" value="yes" ' . $checked . '><label for="send_subscription_email">Select to send subscription notification</label>';
-}
-
-public function save_subscription_meta( $post_id ) {
-
-    // Check if nonce is set and valid
-    if ( ! isset( $_POST['eloqua_email_subject_line_nonce'] ) ) {
-        return;
-    }
-
-    if ( ! wp_verify_nonce( $_POST['eloqua_email_subject_line_nonce'], 'eloqua_email_subject_line_nonce' ) ) {
-        return;
-    }
-
-    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-        return;
-    }
-
-    if ( isset( $_POST['eloqua_email_subject_line'] ) ) {
-        $subject_line = sanitize_text_field( $_POST['eloqua_email_subject_line'] );
-        update_post_meta( $post_id, 'eloqua_email_subject_line', $subject_line );
-    }
-
-    if ( isset( $_POST['send_subscription_email'] ) ) {
-        update_post_meta( $post_id, 'send_subscription_email', true );
-    } else {
-        update_post_meta( $post_id, 'send_subscription_email', false );
-    }
 }
 
 }

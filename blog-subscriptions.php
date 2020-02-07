@@ -2,7 +2,7 @@
 /*
 Plugin Name: Blog Subscriptions with Eloqua
 Description: Use Eloqua to send a notification to subscribers whenever a new blog post is published
-Version: 1.0
+Version: 1.1
 Author: Kevin A. Wilson
 Author URI: http://www.bluecord.org/#kevinawilson
 License: GPL v2 or later
@@ -20,10 +20,10 @@ require_once('BlogSubscriptionsOptions.php');
 require_once('EloquaConnector.php');
 
 $settings = new BlogSubscriptionOptions();
-$connector = new EloquaConnector();
+
 
 // Main function
-function blog_notification($id, $post) {
+function blog_notification($id, $post, $connector) {
 
     if ( !isset( $_POST['send_subscription_email'] ) ) {
       return;
@@ -33,14 +33,16 @@ function blog_notification($id, $post) {
       return;
     };
 
+    $connector = new EloquaConnector();
+
     $title = $post->post_title;
     $link = get_permalink($post);
 
     $email_id = $connector->create_email($link, $title);
 
-    $campaign = $connector->create_eloqua_campaign($email_id);
+    $campaign = $connector->create_campaign($email_id);
 
-    activate_eloqua_campaign($campaign);
+    $connector->activate_campaign($campaign);
 
     add_post_meta($id, 'eloqua_email_sent', true, true);
 };
@@ -52,7 +54,8 @@ add_action( $post_type, 'blog_notification', 99, 2 );
 
 // Add shortcode for form
 function display_blog_subscription_form($attr) {
-  $response = $connector->retrieve_blog_subscription_form($attr);
+  $connector = new EloquaConnector();
+  $response = $connector->retrieve_form($attr);
 
   $options = get_option('blog-subscription');
 
@@ -95,16 +98,16 @@ function display_blog_subscription_form($attr) {
 
     function handleFormSubmit(ele) {
       if(validAddress) {
-
-      ' . substr($removed_script[0], $posSubmit + 1) . '
+        ' . substr($removed_script[0], $posSubmit + 1) . '
       else {
         window.location.href = "' . $invalidDomainsRedirect . '";
         return false;
       }
     }' . substr($validation_script, $posRemainder + 1) . '
 
-
     </script>';
+
+    $extra_script = add_testing_jquery($extra_script);
 
   return $dom->saveHTML() . $extra_script;
 };
@@ -167,5 +170,35 @@ function save_subscription_meta( $post_id ) {
 }
 
 add_action( 'save_post', 'save_subscription_meta' );
+
+function add_testing_jquery($script) {
+
+  $script .= "<script>
+    $( document ).ready(function() {
+      $('#blog-subscription').click(function() {
+        blogForm = $('#blog-subscription-form');
+        blogForm.removeClass('hidden-form');
+
+        formHeight = blogForm.height();
+        windowHeight = $(window).height();
+        formTop = windowHeight/2 - formHeight/2 - 10;
+
+        windowWidth = $(window).width();
+        formWidth = blogForm.width();
+        formLeft = windowWidth/2 - formWidth/2 - 10;
+
+        blogForm.css('top', formTop).css('left', formLeft);
+
+      });
+      $('#close-modal-button').click(function() {
+        $('#blog-subscription-form').addClass('hidden-form');
+        $('.LV_invalid_field').removeClass('LV_invalid_field');
+        $('.LV_validation_message').remove();
+      });
+    });
+    </script>";
+
+  return $script;
+}
 
 ?>
