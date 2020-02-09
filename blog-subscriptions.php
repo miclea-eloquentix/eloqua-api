@@ -23,7 +23,7 @@ $settings = new BlogSubscriptionOptions();
 
 
 // Main function
-function blog_notification($id, $post, $connector) {
+function blog_notification($id, $post) {
 
     if ( !isset( $_POST['send_subscription_email'] ) ) {
       return;
