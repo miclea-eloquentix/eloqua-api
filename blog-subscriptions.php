@@ -16,6 +16,10 @@ Blog Subscriptions with Eloqua is distributed in the hope that it will be useful
 You should have received a copy of the GNU General Public License along with Blog Subscriptions with Eloqua. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
 */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 require_once('BlogSubscriptionsOptions.php');
 require_once('EloquaConnector.php');
 
@@ -108,8 +112,6 @@ function display_blog_subscription_form($attr) {
 
     </script>';
 
-    //$extra_script = add_testing_jquery($extra_script);
-
   return $dom->saveHTML() . $extra_script;
 };
 
@@ -171,35 +173,5 @@ function save_subscription_meta( $post_id ) {
 }
 
 add_action( 'save_post', 'save_subscription_meta' );
-
-function add_testing_jquery($script) {
-
-  $script .= "<script>
-    $( document ).ready(function() {
-      $('#blog-subscription').click(function() {
-        blogForm = $('#blog-subscription-form');
-        blogForm.removeClass('hidden-form');
-
-        formHeight = blogForm.height();
-        windowHeight = $(window).height();
-        formTop = windowHeight/2 - formHeight/2 - 10;
-
-        windowWidth = $(window).width();
-        formWidth = blogForm.width();
-        formLeft = windowWidth/2 - formWidth/2 - 10;
-
-        blogForm.css('top', formTop).css('left', formLeft);
-
-      });
-      $('#close-modal-button').click(function() {
-        $('#blog-subscription-form').addClass('hidden-form');
-        $('.LV_invalid_field').removeClass('LV_invalid_field');
-        $('.LV_validation_message').remove();
-      });
-    });
-    </script>";
-
-  return $script;
-}
 
 ?>
