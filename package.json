@@ -1,0 +1,16 @@
+{
+  "name": "inovalon",
+  "version": "1.0.3",
+  "description": "WordPress theme for Inovalon",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-cli": "^2.2.0",
+    "gulp-zip": "^4.2.0"
+  }
+}

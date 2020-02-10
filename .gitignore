@@ -1,3 +1,6 @@
+# Zipped themes
+/dist/*
+
 # Logs
 logs
 *.log

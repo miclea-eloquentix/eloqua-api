@@ -12,9 +12,15 @@ class EloquaConnector {
         $username = $this->options['eloqua_username'];
         $password = $this->options['eloqua_password'];
 
-        $this->headers = array(
+        /*$this->headers = array(
           'Content-Type: application/json',
           'Authorization: Basic '. base64_encode("$username:$password")
+        );*/
+
+        $this->headers = array(
+          'headers' => array(
+            'Authorization' => 'Basic ' . base64_encode("$username:$password")
+          )
         );
     }
 
@@ -174,13 +180,18 @@ class EloquaConnector {
       $form_attr = shortcode_atts( array( 'id' => '0' ), $attr );
 
       $form_url = 'https://secure.p04.eloqua.com/api/REST/2.0/assets/form/' . $form_attr['id'];
-      $ch = curl_init($form_url);
+
+      /*$ch = curl_init($form_url);
 
       curl_setopt($ch, CURLOPT_HTTPHEADER, $this->headers);
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
       $response = curl_exec($ch);
+      */
+
+      $response = wp_remote_get($form_url, $this->headers);
+
       $response = json_decode($response, true);
 
       return $response;
