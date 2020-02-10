@@ -5,10 +5,10 @@ class EloquaConnector {
     private $options;
     private $headers;
 
-    public function __constructor() {
-
+    public function __construct() {
         // Set options
-        $this->$options = get_option('blog-subscription');
+        $this->options = get_option('blog-subscription');
+
         $username = $this->options['eloqua_username'];
         $password = $this->options['eloqua_password'];
 
@@ -171,7 +171,6 @@ class EloquaConnector {
 
     // Retrieve a form from Eloqua
     public function retrieve_form($attr) {
-
       $form_attr = shortcode_atts( array( 'id' => '0' ), $attr );
 
       $form_url = 'https://secure.p04.eloqua.com/api/REST/2.0/assets/form/' . $form_attr['id'];

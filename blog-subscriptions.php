@@ -54,6 +54,7 @@ add_action( $post_type, 'blog_notification', 99, 2 );
 
 // Add shortcode for form
 function display_blog_subscription_form($attr) {
+
   $connector = new EloquaConnector();
   $response = $connector->retrieve_form($attr);
 
@@ -107,7 +108,7 @@ function display_blog_subscription_form($attr) {
 
     </script>';
 
-    $extra_script = add_testing_jquery($extra_script);
+    //$extra_script = add_testing_jquery($extra_script);
 
   return $dom->saveHTML() . $extra_script;
 };
