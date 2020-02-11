@@ -4,7 +4,7 @@ class EloquaConnector {
 
     private $options;
     private $headers;
-    private $old_headers;
+    private $wp_headers;
 
     public function __construct() {
         // Set options
@@ -13,12 +13,12 @@ class EloquaConnector {
         $username = $this->options['eloqua_username'];
         $password = $this->options['eloqua_password'];
 
-        $this->old_headers = array(
+        $this->headers = array(
           'Content-Type: application/json',
           'Authorization: Basic '. base64_encode("$username:$password")
         );
 
-        $this->headers = array(
+        $this->wp_headers = array(
           'headers' => array(
             'Authorization' => 'Basic ' . base64_encode("$username:$password")
           )
@@ -43,7 +43,7 @@ class EloquaConnector {
         // Retrieve email template
         $ch = curl_init($retrieve_email_url);
 
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $this->old_headers);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $this->headers);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -82,7 +82,7 @@ class EloquaConnector {
 
         $email_data = json_encode($new_email);
 
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $this->old_headers);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $this->headers);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $email_data);
@@ -90,13 +90,7 @@ class EloquaConnector {
         $response = curl_exec($ch);
         curl_close($ch);
 
-        if (!$response === false) {
-          $response = json_decode($response, true);
-          add_action( 'admin_notices', 'email_success_notice' );
-        } else {
-          add_action( 'admin_notices', 'email_error_notice' );
-        }
-
+        $response = json_decode($response, true);
         return $response['id'];
     }
 
@@ -108,61 +102,60 @@ class EloquaConnector {
         $segment_id = $this->options['eloqua_segment_id'];
         $segment_name = $this->options['eloqua_segment_name'];
 
-
-        $ch = curl_init($create_campaign_url);
-
         $t = time();
         $d = date("Y-m-d",$t);
         $stamp = ' ' . $t . ' ' . $d;
         $endAt = $t + (7 * 24 * 60 * 60);
 
-        $json_body = '{
-          "name": "Inovalon Blog Subscription Campaign ' . $stamp . '",
-          "endAt": ' . $endAt . ',
-          "elements": [{
-            "type": "CampaignSegment",
-            "id": "-1",
-            "name": "'. $segment_name . '",
-            "segmentId": "'. $segment_id . '",
-            "position": {
-              "type": "Position",
-              "x": "100",
-              "y": "100"
-            },
-            "outputTerminals": [{
-              "type": "CampaignOutputTerminal",
-              "connectedId": "-2",
-              "connectedType": "CampaignEmail",
-              "terminalType": "out"
-              }]
-            },
-            {
-              "type": "CampaignEmail",
-              "emailId": "' . $email_id .'",
-              "id": "-2",
-              "position": {
-                "type": "Position",
-                "x": "100",
-                "y": "200"
-              }
-            }
-          ]
-        }';
+        $body = array(
+          'name' => 'Inovalon Blog Subscription Campaign ' . $stamp,
+          'endAt' => $endAt,
+          'elements' => array(
+            array(
+              'type' => 'CampaignSegment',
+              'id' => '-1',
+              'name' => $segment_name,
+              'segmentId' => $segment_id,
+              'position' => array(
+                'type' => 'Position',
+                'x' => '100',
+                'y' => '100'
+              ),
+              'outputTerminals' => array(
+                'type' => 'CampaignOutputTerminal',
+                'connectedId' => '-2',
+                'connectedType' => 'CampaignEmail',
+                'terminalType' => 'out'
+              )
+            ),
+            array(
+              'type' => 'CampaignEmail',
+              'emailId' => $email_id,
+              'id' => '-2',
+              'position' => array(
+                'type' => 'Position',
+                'x' => '100',
+                'y' => '200'
+              )
+            )
+          )
+        );
 
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $this->old_headers);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $json_body);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $args = array(
+          'body' => wp_json_encode($body),
+          'timeout' => '5',
+          'redirection' => '5',
+          'httpversion' => '1.0',
+          'blocking' => true,
+          'headers' => implode("\r\n", $this->headers),
+          'cookies' => array()
+        );
 
-        $response = curl_exec($ch);
+        $response = wp_remote_post($create_campaign_url, $args);
+        $response_body = wp_remote_retrieve_body( $response );
+        $response_array = json_decode($response_body, true);
 
-        if (!$response === false) {
-          $response = json_decode($response, true);
-        } else {
-          add_action( 'admin_notices', 'create_campaign_error_notice' );
-        }
-
-        return $response['id'];
+        return $response_array['id'];
     }
 
     // Activate the new campaign
@@ -171,46 +164,20 @@ class EloquaConnector {
         // Set options
         $activate_url = $this->options['eloqua_activate_campaign_url'] . '/' . $campaign_id;
 
-        /*
-        $ch = curl_init($activate_url);
-
-        $params = '{
-          "activateNow": true,
-          "scheduledFor": "now"
-        }';
-
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $this->old_headers);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        $response = curl_exec($ch);
-        curl_close($ch);
-        */
-
-        $body = array(
-          'activateNow' => true,
-          'scheduledFor' => 'now'
-        );
+        $body = array( 'activateNow' => true, 'scheduledFor' => 'now' );
 
         $args = array(
-          'body' => $body,
+          'body' => wp_json_encode($body),
           'timeout' => '5',
           'redirection' => '5',
           'httpversion' => '1.0',
           'blocking' => true,
-          'headers' => $this->headers,
+          'headers' => implode("\r\n", $this->headers),
           'cookies' => array()
         );
 
         $response = wp_remote_post($activate_url, $args);
-
-        if (!$response === false) {
-          $response = json_decode($response, true);
-          add_action( 'admin_notices', 'campaign_success_notice' );
-        } else {
-          add_action( 'admin_notices', 'activate_campaign_error_notice' );
-        }
+        $response = json_decode($response, true);
     }
 
     // Retrieve a form from Eloqua
@@ -219,7 +186,7 @@ class EloquaConnector {
 
       $form_url = 'https://secure.p04.eloqua.com/api/REST/2.0/assets/form/' . $form_attr['id'];
 
-      $response = wp_remote_get($form_url, $this->headers);
+      $response = wp_remote_get($form_url, $this->wp_headers );
       $response = json_decode($response['body'], true);
 
       return $response;
