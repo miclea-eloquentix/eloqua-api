@@ -182,12 +182,17 @@ class EloquaConnector {
 
     // Retrieve a form from Eloqua
     public function retrieve_form($attr) {
-      $form_attr = shortcode_atts( array( 'id' => '0' ), $attr );
 
-      $form_url = 'https://secure.p04.eloqua.com/api/REST/2.0/assets/form/' . $form_attr['id'];
+      if ( false === ( $response = get_transient( 'blog_subscription_form' ) ) ) {
+        $form_attr = shortcode_atts( array( 'id' => '0' ), $attr );
 
-      $response = wp_remote_get($form_url, $this->wp_headers );
-      $response = json_decode($response['body'], true);
+        $form_url = $this->options['eloqua_retrieve_form_url'] . '/' . $form_attr['id'];
+
+        $response = wp_remote_get($form_url, $this->wp_headers );
+        $response = json_decode($response['body'], true);
+
+        set_transient( 'blog_subscription_form', $response, 24 * HOUR_IN_SECONDS );
+      }
 
       return $response;
     }

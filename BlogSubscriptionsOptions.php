@@ -185,6 +185,14 @@ class BlogSubscriptionOptions {
         'eloqua-urls'
       );
 
+      add_settings_field(
+        'eloqua_retrieve_form_url',
+        'Eloqua Retrieve Form URL',
+        array($this, 'eloqua_retrieve_form_url_callback'),
+        'blog-subscription-setting-admin',
+        'eloqua-urls'
+      );
+
       add_settings_section(
         'subscription_post_type_section',
         'Subscription Post Type',
@@ -287,6 +295,10 @@ class BlogSubscriptionOptions {
 
         if (isset($input['eloqua_activate_campaign_url'])) {
             $new_input['eloqua_activate_campaign_url'] = sanitize_text_field($input['eloqua_activate_campaign_url']);
+        }
+
+        if (isset($input['eloqua_retrieve_form_url'])) {
+            $new_input['eloqua_retrieve_form_url'] = sanitize_text_field($input['eloqua_retrieve_form_url']);
         }
 
         if (isset($input['subscription_post_type'])) {
@@ -421,6 +433,13 @@ class BlogSubscriptionOptions {
         printf(
           '<input type="text" id="eloqua_activate_campaign_url" name="blog-subscription[eloqua_activate_campaign_url]" value="%s" size="50"/>',
           isset($this->options['eloqua_activate_campaign_url']) ? esc_attr($this->options['eloqua_activate_campaign_url']) : ''
+        );
+    }
+
+    public function eloqua_retrieve_form_url_callback() {
+        printf(
+          '<input type="text" id="eloqua_retrieve_form_url" name="blog-subscription[eloqua_retrieve_form_url]" value="%s" size="50"/>',
+          isset($this->options['eloqua_retrieve_form_url']) ? esc_attr($this->options['eloqua_retrieve_form_url']) : ''
         );
     }
 
