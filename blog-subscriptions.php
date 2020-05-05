@@ -231,6 +231,7 @@ function display_blog_subscription_form($attr) {
 
   $dom = new DOMDocument();
   $dom->loadHTML($response['html']);
+
   $scripts = $dom->getElementsByTagName('script');
   $validation_script = $dom->saveHTML($scripts[1]);
   $scripts[1]->parentNode->removeChild($scripts[1]);
@@ -276,6 +277,13 @@ function display_blog_subscription_form($attr) {
 
 
     </script>';
+
+  if ($options['include_css']) {
+    $domCSS = new DOMDocument();
+    $domCSS->loadHTML($response['customCSS']);
+    $style = $domCSS->getElementsByTagName('style');
+    $extra_script = $extra_script . $domCSS->saveHTML($style[0]);
+  };
 
   return $dom->saveHTML() . $extra_script;
 };

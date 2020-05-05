@@ -28,6 +28,10 @@ class BlogSubscriptionOptions {
                 $this->options[$key] = stripslashes($value);
             }
 
+            if ( !isset($_POST['blog-subscription']['include_css']) ) {
+              $this->options['include_css'] = 0;
+            }
+
             update_option('blog-subscription', $this->options); ?>
             <div class="updated"><p><strong>Settings saved</strong></p></div>
         <?php } ?>
@@ -200,6 +204,14 @@ class BlogSubscriptionOptions {
         'subscription_post_type_section'
       );
 
+      add_settings_field(
+        'include_css',
+        'Check to Include Custom CSS from Eloqua',
+        array($this, 'include_css_callback'),
+        'blog-subscription-setting-admin',
+        'subscription_post_type_section'
+      );
+
       add_settings_section(
         'invalid_domains_section',
         'Invalid Email Domains',
@@ -291,6 +303,10 @@ class BlogSubscriptionOptions {
 
         if (isset($input['subscription_post_type'])) {
             $new_input['subscription_post_type'] = sanitize_text_field($input['subscription_post_type']);
+        }
+
+        if (isset($input['include_css'])) {
+            $new_input['include_css'] = trim($input['include_css']);
         }
 
         if (isset($input['invalid_domains'])) {
@@ -438,6 +454,14 @@ class BlogSubscriptionOptions {
 
         printf(
           '<select name="blog-subscription[subscription_post_type]">' . $selector_options .'</select>'
+        );
+    }
+
+    public function include_css_callback() {
+        $includeCSS = ( isset($this->options['include_css']) && $this->options['include_css'] == 1) ? 1 : 0;
+
+        printf(
+          '<input type="checkbox" id="include_css" name="blog-subscription[include_css]" value="1" %s>', checked(1, $includeCSS, false)
         );
     }
 
